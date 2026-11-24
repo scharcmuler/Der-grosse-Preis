@@ -58,6 +58,7 @@ Aktuelles Firebase-Projekt: `der-grosse-preis-27e6a` (Region `europe-west1`).
 ### Konzept
 - Nur der GM klickt. Teams sagen ihr Feld an („Sport für 30“), der GM tippt es an.
 - Handys sind reine Anzeige: aktuelle Frage, Antwort nach Auflösung, Board, Punktestand, Reihenfolge.
+- Beim ersten Laden öffnet sich ein Overlay mit den allgemeinen Spielregeln. Es kann jederzeit über **📜 Regeln** im Header erneut geöffnet werden.
 - **Rotation:** Teams sind reihum dran. Jedes Team hat eine **aktive Person**; nach jedem eigenen Zug rückt im Team die nächste Person nach (Team 1·Anna → Team 2·Emil → … → Team 1·Ben …). Die aktive Person jedes Teams wird unter der Frage als „Aktive Spieler“ angezeigt – damit ist bei 1-gegen-1-Minispielen/Duellen klar, wer gegeneinander spielt.
 ### GM-Ansicht (`#gm`)
 - **Spiel-Tab**
@@ -72,7 +73,8 @@ Aktuelles Firebase-Projekt: `der-grosse-preis-27e6a` (Region `europe-west1`).
 - **Setup-Tab** (Änderungen erst mit **Speichern** live)
   - Titel, Punktestufen (z. B. `10, 20, 30, 40, 50`), Minuspunkte an/aus.
   - Teams: Name, Farbe, Mitglieder (Komma oder Zeilenumbruch, in Spielreihenfolge).
-  - Kategorien: Name + Frage/Antwort je Punktestufe; Kategorien hinzufügen/löschen.
+  - Kategorien: Name + Hinweis für Spieler + Frage/Antwort je Punktestufe; Kategorien hinzufügen/löschen.
+  - Spielregeln-Abschnitt mit einfacher Formatierung: `## Überschrift`, `- Liste`, `**fett**`.
   - **Export/Import (JSON)** als Backup. **Spielstand zurücksetzen** löscht nur den Spielverlauf, nicht Fragen/Teams.
 ### Am Abend
 - QR-Code zur Zuschauer-URL auf die Tische.
@@ -88,8 +90,9 @@ Aktuelles Firebase-Projekt: `der-grosse-preis-27e6a` (Region `europe-west1`).
     "title": "Der Große Preis",
     "points": [10, 20, 30, 40, 50],          // Zeilen des Boards
     "allowMinus": false,                      // Minuspunkte bei "falsch"
+    "rules": "## So funktioniert's\\n- Alle Teams spielen reihum",
     "teams": [{ "id": "t1", "name": "Team 1", "color": "#d1495b", "members": ["Anna", "Ben"] }],
-    "categories": [{ "name": "Sport", "questions": [{ "q": "Frage", "a": "Antwort", "note": "GM-Notiz" }] }]  // questions[i] gehört zu points[i]
+    "categories": [{ "name": "Sport", "hint": "Kurzer Hinweis für die Spieler", "questions": [{ "q": "Frage", "a": "Antwort", "note": "GM-Notiz" }] }]  // questions[i] gehört zu points[i]
   },
   "game": {
     "taken":  { "<catIndex>_<rowIndex>": { "team": "t1", "pts": 30 } },  // team "" = keiner wusste es
