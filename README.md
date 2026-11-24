@@ -89,7 +89,7 @@ Aktuelles Firebase-Projekt: `der-grosse-preis-27e6a` (Region `europe-west1`).
     "points": [10, 20, 30, 40, 50],          // Zeilen des Boards
     "allowMinus": false,                      // Minuspunkte bei "falsch"
     "teams": [{ "id": "t1", "name": "Team 1", "color": "#d1495b", "members": ["Anna", "Ben"] }],
-    "categories": [{ "name": "Sport", "questions": [{ "q": "Frage", "a": "Antwort" }] }]  // questions[i] gehört zu points[i]
+    "categories": [{ "name": "Sport", "questions": [{ "q": "Frage", "a": "Antwort", "note": "GM-Notiz" }] }]  // questions[i] gehört zu points[i]
   },
   "game": {
     "taken":  { "<catIndex>_<rowIndex>": { "team": "t1", "pts": 30 } },  // team "" = keiner wusste es
@@ -129,4 +129,3 @@ Design: Winter-/Weihnachtsthema (Nachthimmel, Schneefall, Lichterkette, Felder a
 ## Historie
  
 - 2026-11: Erstellt mit Claude (Konzept, App, Design). Vorbild war eine frühere Freundesrunde mit Beamer + Excel-Tabelle.
- 

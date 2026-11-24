@@ -108,9 +108,9 @@ textarea{min-height:40px;resize:vertical}
 details.catedit{background:var(--glass);border:1px solid var(--gline);border-radius:12px;padding:8px 10px;margin-bottom:6px}
 details.catedit summary{cursor:pointer;font-weight:600}
 details.catedit summary span{color:var(--mut);font-weight:400;font-size:.85rem}
-.qrow{display:grid;grid-template-columns:38px 1fr 1fr;gap:6px;margin:6px 0;align-items:start}
+.qrow{display:grid;grid-template-columns:38px 1fr 1fr 1fr;gap:6px;margin:6px 0;align-items:start}
 .qrow b{color:var(--gold);padding-top:8px}
-@media(max-width:600px){.qrow{grid-template-columns:32px 1fr}.qrow input{grid-column:2}}
+@media(max-width:600px){.qrow{grid-template-columns:32px 1fr}.qrow textarea,.qrow input{grid-column:2}}
 @media(max-width:420px){.board{gap:3px}.cat{font-size:.56rem;letter-spacing:.02em;padding:5px 1px;min-height:38px;line-height:1.1}.cell{font-size:1.05rem;border-radius:6px}}
 .savebar{position:sticky;bottom:0;background:#0b1d2aee;padding:10px 0;display:flex;gap:8px;margin-top:12px}
 .login{max-width:360px;margin:40px auto}
@@ -119,6 +119,9 @@ details.catedit summary span{color:var(--mut);font-weight:400;font-size:.85rem}
 #toast.show{opacity:1}
 @media(min-width:900px){.cell{font-size:1.7rem}.cat{font-size:.8rem}h1{font-size:2.2rem}}
 @media(prefers-reduced-motion:reduce){.lights span,.cell.current{animation:none}}
+.gm-note{position:relative;margin-top:12px;padding:11px 12px 12px 15px;border:1px solid #f2c14e88;border-radius:12px;background:linear-gradient(135deg,#f2c14e18,#0003);text-align:left;color:var(--snow);font-size:1.05rem;font-weight:600;line-height:1.35;white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:inset 3px 0 0 var(--gold)}
+.gm-note .lbl{display:block;margin:0 0 5px;color:var(--gold);font-size:.68rem;letter-spacing:.16em}
+.gm-note .lbl::before{content:"✎ ";font-size:.9rem}
 </style>
 </head>
 <body>
@@ -154,7 +157,7 @@ const openCats = new Set();
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const clone = o => JSON.parse(JSON.stringify(o));
 const toArr = x => !x ? [] : Array.isArray(x) ? x.filter(v => v != null) : Object.keys(x).sort((a,b)=>a-b).map(k => x[k]);
-const pad = (a, n) => { a = a.slice(0, n); while (a.length < n) a.push({q:"", a:""}); return a; };
+const pad = (a, n) => { a = a.slice(0, n); while (a.length < n) a.push({q:"", a:"", note:""}); return a; };
 const parseMembers = v => (Array.isArray(v) ? v : String(v || "").split(/[,\n;]/)).map(x => String(x).trim()).filter(Boolean);
 
 function defaultState(){
@@ -165,7 +168,7 @@ function defaultState(){
       title: "Der Große Preis",
       teams: [0,1,2,3].map(i => ({id:"t"+(i+1), name:"Team "+(i+1), color:TEAM_COLORS[i], members:[]})),
       points,
-      categories: cats.map(n => ({name:n, questions: points.map(() => ({q:"", a:""}))})),
+      categories: cats.map(n => ({name:n, questions: points.map(() => ({q:"", a:"", note:""}))})),
       allowMinus: false
     },
     game: {taken:{}, adjust:{}, ptr:{}, log:[], current:null, turn:0}
@@ -197,7 +200,7 @@ function normalize(raw){
   if (!s.settings.teams.length) s.settings.teams = d.settings.teams;
   s.settings.categories = toArr(rs.categories).map(c => ({
     name: c.name || "",
-    questions: pad(toArr(c.questions).map(q => ({q:q?.q||"", a:q?.a||""})), s.settings.points.length)
+    questions: pad(toArr(c.questions).map(q => ({q:q?.q||"", a:q?.a||"", note:q?.note||""})), s.settings.points.length)
   }));
   if (!s.settings.categories.length) s.settings.categories = d.settings.categories;
   return s;
@@ -333,13 +336,14 @@ function currentHTML(gm){
   if (!cur) return `<div class="card"><div class="lbl">Am Zug</div>
     <div class="turn" style="color:${tt.color}">${esc(tt.name)}</div>${tm ? `<div class="person">${esc(tm)}</div>` : ""}
     <div class="sub">${gm ? "Feld im Board antippen, um die Frage zu öffnen" : "wählt das nächste Feld"}</div>${chipsHTML()}</div>`;
-  const cat = categories[cur.c] || {name:"?", questions:[]}, q = cat.questions[cur.r] || {q:"", a:""}, pts = points[cur.r];
+  const cat = categories[cur.c] || {name:"?", questions:[]}, q = cat.questions[cur.r] || {q:"", a:"", note:""}, pts = points[cur.r];
   const decided = cur.winner != null, wt = teams.find(t => t.id === cur.winner);
   let h = `<div class="card"><div class="meta">${esc(cat.name)} · ${pts} Punkte</div>
     <div class="q">${esc(q.q) || "<i>(keine Frage eingetragen)</i>"}</div>
     <div class="sub">gewählt von <b style="color:${tt.color}">${esc(tt.name)}</b>${tm ? ` · ${esc(tm)}` : ""}</div>`;
   if (cur.reveal) h += `<div class="ans"><span class="lbl">Antwort</span><br>${esc(q.a) || "–"}</div>`;
   else if (gm) h += `<div class="ans hidden"><span class="lbl">Antwort – nur du siehst das</span><br>${esc(q.a) || "–"}</div>`;
+  if (gm && q.note) h += `<div class="gm-note"><span class="lbl">GM-Notiz</span>${esc(q.note)}</div>`;
   const wrong = (cur.wrong||[]).map(id => teams.find(t => t.id === id)).filter(Boolean);
   if (wrong.length) h += `<div class="res">${wrong.map(t => `<span style="color:${t.color}">✗ ${esc(t.name)}</span>`).join("")}</div>`;
   if (decided) h += `<div class="res big">${wt ? `<span style="color:${wt.color}">✓ ${esc(wt.name)} +${pts}</span>` : "Keiner wusste es"}</div>`;
@@ -411,7 +415,8 @@ function setupHTML(){
     <label>Name<input data-cat="${ci}" value="${esc(c.name)}"></label>
     ${d.points.map((p, r) => `<div class="qrow"><b>${p}</b>
       <textarea data-cat="${ci}" data-r="${r}" data-k="q" placeholder="Frage">${esc(c.questions[r]?.q)}</textarea>
-      <input data-cat="${ci}" data-r="${r}" data-k="a" value="${esc(c.questions[r]?.a)}" placeholder="Antwort"></div>`).join("")}
+      <input data-cat="${ci}" data-r="${r}" data-k="a" value="${esc(c.questions[r]?.a)}" placeholder="Antwort">
+      <textarea data-cat="${ci}" data-r="${r}" data-k="note" placeholder="GM-Notiz">${esc(c.questions[r]?.note)}</textarea></div>`).join("")}
     <button class="danger" data-act="delCat" data-i="${ci}">Kategorie löschen</button></details>`).join("")}
   <button class="sec" data-act="addCat">+ Kategorie</button>
   <div class="savebar"><button class="primary" data-act="saveSetup">Speichern</button><button class="sec" data-act="discard">Verwerfen</button></div>
@@ -472,7 +477,7 @@ $app.addEventListener("click", e => {
     case "tab": gmTab = d.t; draft = gmTab === "setup" ? clone(state.settings) : null; render(); break;
     case "addTeam": draft.teams.push({id:"t"+Date.now().toString(36), name:"Team "+(draft.teams.length+1), color:TEAM_COLORS[draft.teams.length % TEAM_COLORS.length], members:[]}); render(); break;
     case "delTeam": if (draft.teams.length > 1){ draft.teams.splice(+d.i, 1); render(); } break;
-    case "addCat": draft.categories.push({name:"Neue Kategorie", questions: draft.points.map(() => ({q:"", a:""}))}); openCats.add(draft.categories.length-1); render(); break;
+    case "addCat": draft.categories.push({name:"Neue Kategorie", questions: draft.points.map(() => ({q:"", a:"", note:""}))}); openCats.add(draft.categories.length-1); render(); break;
     case "delCat": if (confirm("Kategorie löschen?")){ draft.categories.splice(+d.i, 1); openCats.clear(); render(); } break;
     case "discard": draft = clone(state.settings); render(); break;
     case "saveSetup": {
