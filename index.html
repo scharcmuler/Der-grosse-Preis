@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a1824">
+<title>Der Große Preis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Berkshire+Swash&family=Jost:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--night:#0b1d2a;--pine:#0f3b2e;--red:#c0283a;--gold:#f2c14e;--teal:#26a792;--teald:#1d8574;--snow:#f4f8fb;--mut:#a9bccb;--glass:rgba(255,255,255,.07);--gline:rgba(255,255,255,.14)}
+*{box-sizing:border-box}
+html{background:#0a1824}
+body{margin:0;background:linear-gradient(180deg,#0a1824 0%,#0d2833 900px,#103a34 1800px,#103a34 100%);color:var(--snow);font:15px/1.45 Jost,Futura,"Century Gothic",system-ui,sans-serif;min-height:100vh}
+#snow{position:fixed;inset:0;pointer-events:none;z-index:0}
+#app{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 10px 60px}
+/* Lichterkette */
+.lights{position:relative;z-index:2;display:flex;justify-content:space-around;height:26px;margin:0 0 -6px;overflow:hidden;border-top:2px solid #0006}
+.lights::before{content:"";position:absolute;left:0;right:0;top:-8px;height:16px;border-bottom:2px solid #2b3a2f;border-radius:0 0 50% 50%/0 0 100% 100%}
+.lights span{width:9px;height:14px;border-radius:50%;margin-top:6px;background:var(--c);box-shadow:0 2px 12px 2px var(--c);animation:tw 1.6s infinite alternate;animation-delay:var(--d)}
+.lights span:nth-child(4n+1){--c:#ff5a5f}.lights span:nth-child(4n+2){--c:#f2c14e}.lights span:nth-child(4n+3){--c:#3fd4b8}.lights span:nth-child(4n){--c:#7fb3ff}
+@keyframes tw{to{opacity:.35;box-shadow:0 2px 4px 0 var(--c)}}
+header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 4px 12px}
+.brand{display:flex;flex-direction:column}
+.brand .tag{color:var(--teal);font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+h1{font-family:"Berkshire Swash",Georgia,serif;font-weight:400;font-size:1.75rem;margin:0;color:var(--gold);text-shadow:0 0 18px #f2c14e55,0 2px 0 #7a1020;line-height:1.1}
+h3{color:var(--gold);font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.16em;margin:20px 0 8px}
+h3::before{content:"✦ ";color:var(--teal)}
+h2{font-size:1.05rem;font-weight:600;margin:22px 0 8px;color:var(--gold)}
+.conn{font-size:.75rem;color:var(--mut);white-space:nowrap}
+.conn i{display:inline-block;width:8px;height:8px;border-radius:50%;background:#888;margin-right:5px}
+.conn.on i{background:var(--teal);box-shadow:0 0 8px var(--teal)}.conn.off i{background:#ff5a5f}
+.conn.local{color:var(--gold)}
+.card{background:var(--glass);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid #f2c14e66;border-radius:16px;padding:16px;margin-bottom:12px;text-align:center;box-shadow:0 8px 30px #0006,inset 0 1px 0 #ffffff1a}
+.lbl{color:var(--mut);font-size:.72rem;text-transform:uppercase;letter-spacing:.14em}
+.turn{font-size:1.7rem;font-weight:700;line-height:1.2;text-shadow:0 0 16px currentColor}
+.person{font-size:1.2rem;margin-top:2px;font-weight:500}
+.sub{color:var(--mut);font-size:.85rem;margin-top:4px}
+.meta{color:var(--gold);font-weight:600;text-transform:uppercase;letter-spacing:.12em;font-size:.8rem;margin-bottom:6px}
+.q{font-size:1.35rem;font-weight:600;margin:6px 0}
+.ans{margin-top:12px;padding:10px;border-radius:10px;background:#26a79233;border:1px solid var(--teal);font-size:1.15rem;font-weight:600}
+.ans.hidden{background:#0003;border:1px dashed var(--mut);font-weight:400;color:var(--mut)}
+.res{margin-top:10px;font-weight:700;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.res.big{font-size:1.3rem}
+.chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:8px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:#0003;border:1px solid var(--gline);border-radius:20px;padding:4px 11px;font-size:.85rem}
+/* Board: Geschenkpakete */
+.board{display:grid;gap:5px;margin-bottom:6px}
+.cat{background:linear-gradient(#14513f,#0f3b2e);border:1px solid #f2c14e55;color:var(--snow);font-weight:600;font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;text-align:center;padding:6px 2px;border-radius:8px;display:flex;align-items:center;justify-content:center;word-break:break-word;hyphens:auto;min-height:44px;line-height:1.15}
+.cell{--box:#c0283a;--box2:#8a1424;--rib:#f2c14e;position:relative;color:#fff;font-weight:700;font-size:1.3rem;text-shadow:0 1px 3px #000c,0 0 8px #000a;border:0;border-radius:8px;aspect-ratio:1.3;display:flex;align-items:center;justify-content:center;font-family:inherit;padding:0;transition:transform .2s;
+  background:linear-gradient(90deg,transparent 46%,var(--rib) 46% 54%,transparent 54%),linear-gradient(0deg,transparent 46%,var(--rib) 46% 54%,transparent 54%),linear-gradient(145deg,var(--box),var(--box2));box-shadow:0 3px 8px #0006,inset 0 1px 0 #ffffff33}
+.cell.g1{--box:#1f7a55;--box2:#0f4a33;--rib:#ff5a5f}
+.cell.g2{--box:#26a792;--box2:#166b5e;--rib:#f4f8fb}
+button.cell{cursor:pointer}
+button.cell:hover{transform:translateY(-2px)}
+.cell.taken{background:linear-gradient(#0000004d,#0000004d),var(--tc);color:#fff;font-size:.95rem;text-decoration:line-through;box-shadow:none}
+.cell.none{background:#ffffff12;color:#ffffff55;font-size:.95rem;text-decoration:line-through;box-shadow:none;text-shadow:none}
+.cell.current{animation:glow .8s infinite alternate;z-index:1}
+@keyframes glow{from{box-shadow:0 0 0 2px var(--gold),0 0 10px var(--gold)}to{box-shadow:0 0 0 3px var(--gold),0 0 26px 6px var(--gold);transform:scale(1.07)}}
+.lb .row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:var(--glass);border:1px solid var(--gline);border-radius:12px;padding:10px;margin-bottom:6px}
+.lb .row.isturn{border-color:var(--gold);box-shadow:0 0 14px #f2c14e44}
+.dot{width:12px;height:12px;border-radius:50%;flex:none;box-shadow:0 0 6px currentColor}
+.lb .name{flex:1;font-weight:600}
+.lb small{display:block;color:var(--mut);font-weight:400;font-size:.78rem}
+.lb small strong{color:var(--gold);font-weight:600}
+.lb .sc{font-size:1.35rem;font-weight:700;min-width:52px;text-align:right;color:var(--gold)}
+.lb .rank{color:var(--mut);width:22px;text-align:center}
+.lb .row:first-child .rank{font-size:0}.lb .row:first-child .rank::after{content:"⭐";font-size:1rem}
+.lb .gmb{display:flex;gap:6px;width:100%;padding-left:50px}
+.lb button{padding:4px 9px;font-size:.8rem}
+.sched{position:relative;max-height:250px;overflow-y:auto;background:var(--glass);border:1px solid var(--gline);border-radius:12px}
+.srow{display:flex;align-items:center;gap:8px;padding:8px 10px;border-bottom:1px solid #ffffff10;font-size:.9rem}
+.srow .rn{color:var(--mut);width:24px;text-align:right;font-size:.8rem}
+.srow .sn{flex:1}
+.srow .sr{color:var(--mut);font-size:.8rem;text-align:right}
+.srow.past{opacity:.45}
+.srow.now{background:#f2c14e22;border-left:4px solid var(--gold);font-weight:600}
+.srow.now .sr{color:var(--gold);font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+.srow.end{justify-content:center;font-weight:700;color:var(--gold)}
+button,.btn{background:var(--glass);color:var(--snow);border:1px solid var(--gline);border-radius:10px;padding:9px 14px;font:inherit;cursor:pointer;text-decoration:none;display:inline-block}
+button:hover,.btn:hover{background:#ffffff1f}
+button:disabled{opacity:.35;cursor:default}
+button.primary{background:linear-gradient(#2fbfa7,var(--teald));border-color:var(--teal);color:#fff;font-weight:700}
+button.ok{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600}
+button.no{background:transparent;color:#ff8a8f;border-color:#ff5a5f}
+button.danger{background:transparent;color:#ff8a8f;border-color:#ff5a5f}
+.ctrl{margin-top:14px;text-align:left}
+.trow2{display:flex;align-items:center;gap:8px;padding:7px 0;border-top:1px solid #ffffff14}
+.trow2 .name{flex:1;font-weight:600}
+.trow2 small{color:var(--mut);font-weight:400}
+.btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+.gmnav{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.gmnav button.on,.gmnav button.on:hover{background:var(--gold);color:#1a1a1a;border-color:var(--gold);font-weight:700}
+.gmnav a{margin-left:auto}
+.setup label{display:block;margin:8px 0;color:var(--mut);font-size:.85rem}
+.setup label.chk{display:flex;gap:8px;align-items:center;color:var(--snow)}
+input,textarea{width:100%;background:#0006;color:var(--snow);border:1px solid var(--gline);border-radius:8px;padding:8px;font:inherit}
+input:focus,textarea:focus{outline:2px solid var(--teal);border-color:var(--teal)}
+input[type=color]{width:44px;height:38px;padding:2px;flex:none}
+input[type=checkbox]{width:auto;accent-color:var(--teal)}
+textarea{min-height:40px;resize:vertical}
+.tcard{background:var(--glass);border:1px solid var(--gline);border-radius:12px;padding:10px;margin-bottom:6px}
+.trow{display:flex;gap:6px;align-items:center}
+.trow input[data-k=name]{flex:1}
+.tcard textarea{margin-top:6px;min-height:36px}
+details.catedit{background:var(--glass);border:1px solid var(--gline);border-radius:12px;padding:8px 10px;margin-bottom:6px}
+details.catedit summary{cursor:pointer;font-weight:600}
+details.catedit summary span{color:var(--mut);font-weight:400;font-size:.85rem}
+.qrow{display:grid;grid-template-columns:38px 1fr 1fr;gap:6px;margin:6px 0;align-items:start}
+.qrow b{color:var(--gold);padding-top:8px}
+@media(max-width:600px){.qrow{grid-template-columns:32px 1fr}.qrow input{grid-column:2}}
+.savebar{position:sticky;bottom:0;background:#0b1d2aee;padding:10px 0;display:flex;gap:8px;margin-top:12px}
+.login{max-width:360px;margin:40px auto}
+.login input{margin:10px 0}
+#toast{position:fixed;z-index:5;left:50%;bottom:20px;transform:translateX(-50%);background:var(--gold);color:#1a1a1a;font-weight:700;padding:8px 16px;border-radius:20px;opacity:0;transition:opacity .3s;pointer-events:none}
+#toast.show{opacity:1}
+@media(min-width:900px){.cell{font-size:1.7rem}.cat{font-size:.8rem}h1{font-size:2.2rem}}
+@media(prefers-reduced-motion:reduce){.lights span,.cell.current{animation:none}}
+</style>
+</head>
+<body>
+<div class="lights"><span style="--d:0.00s"></span><span style="--d:0.37s"></span><span style="--d:0.74s"></span><span style="--d:1.11s"></span><span style="--d:1.48s"></span><span style="--d:0.25s"></span><span style="--d:0.62s"></span><span style="--d:0.99s"></span><span style="--d:1.36s"></span><span style="--d:0.13s"></span><span style="--d:0.50s"></span><span style="--d:0.87s"></span><span style="--d:1.24s"></span><span style="--d:0.01s"></span><span style="--d:0.38s"></span><span style="--d:0.75s"></span><span style="--d:1.12s"></span><span style="--d:1.49s"></span></div>
+<div id="app"></div>
+<div id="toast"></div>
+<script type="module">
+// ================== KONFIGURATION ==================
+// Leer lassen = lokaler Testmodus (nur auf diesem Gerät, Sync zwischen Browser-Tabs).
+// Für den echten Einsatz die Firebase-Web-Config hier einfügen.
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyD5j5_T6Zghg0O7L_iqLHLw3MNpAOsEMQo",
+  authDomain: "der-grosse-preis-27e6a.firebaseapp.com",
+  databaseURL: "https://der-grosse-preis-27e6a-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "der-grosse-preis-27e6a",
+  storageBucket: "der-grosse-preis-27e6a.firebasestorage.app",
+  messagingSenderId: "749143155702",
+  appId: "1:749143155702:web:4828b745077303ed5e5dd7",
+  measurementId: "G-8LPPST6WFR"
+};
+const GM_PASSWORD = "weihnachten";   // Passwort für die Game-Master-Ansicht (URL + #gm)
+const DB_PATH = "quiz";
+// ===================================================
+
+const FB_VER = "10.12.2";
+const TEAM_COLORS = ["#d1495b","#2f6db5","#e8a33d","#6c4f9e","#3a3a3a","#7fb069","#c2185b","#00838f"];
+const $app = document.getElementById("app");
+let state = defaultState(), store = null, connected = false;
+let isGM = sessionStorage.getItem("gm") === "1";
+let gmTab = "spiel", draft = null, history = [];
+const openCats = new Set();
+
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clone = o => JSON.parse(JSON.stringify(o));
+const toArr = x => !x ? [] : Array.isArray(x) ? x.filter(v => v != null) : Object.keys(x).sort((a,b)=>a-b).map(k => x[k]);
+const pad = (a, n) => { a = a.slice(0, n); while (a.length < n) a.push({q:"", a:""}); return a; };
+const parseMembers = v => (Array.isArray(v) ? v : String(v || "").split(/[,\n;]/)).map(x => String(x).trim()).filter(Boolean);
+
+function defaultState(){
+  const points = [10,20,30,40,50];
+  const cats = ["Sport","Schule","Geschichte/Geo","Film/Fernsehen","Minigames","Schätzen"];
+  return {
+    settings: {
+      title: "Der Große Preis",
+      teams: [0,1,2,3].map(i => ({id:"t"+(i+1), name:"Team "+(i+1), color:TEAM_COLORS[i], members:[]})),
+      points,
+      categories: cats.map(n => ({name:n, questions: points.map(() => ({q:"", a:""}))})),
+      allowMinus: false
+    },
+    game: {taken:{}, adjust:{}, ptr:{}, log:[], current:null, turn:0}
+  };
+}
+
+function normalize(raw){
+  const d = defaultState();
+  if (!raw) return d;
+  const rs = raw.settings || {}, rg = raw.game || {};
+  const points = toArr(rs.points).map(Number).filter(n => n > 0);
+  const s = {
+    settings: {
+      title: rs.title ?? d.settings.title,
+      teams: toArr(rs.teams).map(t => ({id:t.id, name:t.name||"", color:t.color||"#888888", members:parseMembers(typeof t.members === "string" ? t.members : toArr(t.members))})),
+      points: points.length ? points : d.settings.points,
+      categories: [],
+      allowMinus: !!rs.allowMinus
+    },
+    game: {
+      taken: rg.taken || {},
+      adjust: rg.adjust || {},
+      ptr: rg.ptr || {},
+      log: toArr(rg.log),
+      current: rg.current ? {...rg.current, wrong: toArr(rg.current.wrong)} : null,
+      turn: Number(rg.turn || 0)
+    }
+  };
+  if (!s.settings.teams.length) s.settings.teams = d.settings.teams;
+  s.settings.categories = toArr(rs.categories).map(c => ({
+    name: c.name || "",
+    questions: pad(toArr(c.questions).map(q => ({q:q?.q||"", a:q?.a||""})), s.settings.points.length)
+  }));
+  if (!s.settings.categories.length) s.settings.categories = d.settings.categories;
+  return s;
+}
+
+function scores(s){
+  const sc = {};
+  s.settings.teams.forEach(t => sc[t.id] = Number(s.game.adjust?.[t.id] || 0));
+  for (const k in s.game.taken){
+    const v = s.game.taken[k];
+    if (v && v.team && sc[v.team] != null) sc[v.team] += Number(v.pts || 0);
+  }
+  return sc;
+}
+const turnTeam = s => s.settings.teams[s.game.turn % s.settings.teams.length] || s.settings.teams[0];
+// Aktive Person eines Teams = die, die als Nächstes dran ist (rotiert nach jedem eigenen Zug)
+function activeMember(s, t){ const m = t.members || []; return m.length ? m[(s.game.ptr?.[t.id] || 0) % m.length] : ""; }
+function upcoming(s, n){
+  const teams = s.settings.teams, ptr = {...(s.game.ptr || {})}, out = [];
+  for (let k = 0; k < n; k++){
+    const t = teams[(s.game.turn + k) % teams.length], m = t.members || [];
+    out.push({t, member: m.length ? m[(ptr[t.id] || 0) % m.length] : ""});
+    ptr[t.id] = (ptr[t.id] || 0) + 1;
+  }
+  return out;
+}
+
+// ---------- Speicher: Firebase oder lokal ----------
+async function initStore(){
+  if (FIREBASE_CONFIG.databaseURL){
+    const {initializeApp} = await import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-app.js`);
+    const {getDatabase, ref, onValue, set} = await import(`https://www.gstatic.com/firebasejs/${FB_VER}/firebase-database.js`);
+    const db = getDatabase(initializeApp(FIREBASE_CONFIG));
+    const r = ref(db, DB_PATH);
+    store = {mode:"firebase", save: s => set(r, s).catch(e => alert("Speichern fehlgeschlagen: " + e.message))};
+    onValue(ref(db, ".info/connected"), snap => { connected = !!snap.val(); updateConn(); });
+    onValue(r, snap => onRemote(snap.val()));
+  } else {
+    const KEY = "grosserpreis_state";
+    store = {mode:"local", save: s => localStorage.setItem(KEY, JSON.stringify(s))};
+    window.addEventListener("storage", e => { if (e.key === KEY) onRemote(JSON.parse(e.newValue)); });
+    onRemote(JSON.parse(localStorage.getItem(KEY) || "null"));
+  }
+}
+function onRemote(raw){
+  state = normalize(raw);
+  if (location.hash === "#gm" && isGM && gmTab === "setup") return; // Eingaben nicht überschreiben
+  render();
+}
+function updateConn(){
+  const el = document.querySelector(".conn");
+  if (el && store?.mode === "firebase"){ el.className = "conn " + (connected ? "on" : "off"); el.innerHTML = `<i></i>${connected ? "live" : "verbinde…"}`; }
+}
+
+function commit(mutate){
+  history.push(JSON.stringify(state)); if (history.length > 60) history.shift();
+  const s = clone(state); mutate(s); state = s;
+  store.save(clone(s)); render();
+}
+function undo(){
+  if (!history.length) return;
+  state = normalize(JSON.parse(history.pop()));
+  store.save(clone(state));
+  if (gmTab === "setup") draft = clone(state.settings);
+  render(); toast("Rückgängig");
+}
+function toast(msg){ const t = document.getElementById("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("show"), 1500); }
+
+// ---------- Game-Master-Aktionen ----------
+const A = {
+  open(c, r){
+    const k = c + "_" + r;
+    if (state.game.current) return toast("Erst aktuelle Frage abschließen");
+    if (state.game.taken[k]){
+      if (confirm("Feld ist schon vergeben. Wieder freigeben (Punkte werden abgezogen)?")) commit(s => { delete s.game.taken[k]; });
+      return;
+    }
+    commit(s => { s.game.current = {c, r, reveal:false, wrong:[]}; });
+  },
+  reveal(){ commit(s => { s.game.current.reveal = true; }); },
+  award(tid){ commit(s => { const cur = s.game.current; s.game.taken[cur.c+"_"+cur.r] = {team:tid, pts:s.settings.points[cur.r]}; cur.winner = tid; cur.reveal = true; }); },
+  wrong(tid){ commit(s => { const cur = s.game.current; cur.wrong = [...(cur.wrong||[]), tid];
+    if (s.settings.allowMinus) s.game.adjust[tid] = (s.game.adjust[tid]||0) - s.settings.points[cur.r]; }); },
+  nobody(){ commit(s => { const cur = s.game.current; s.game.taken[cur.c+"_"+cur.r] = {team:"", pts:0}; cur.winner = ""; cur.reveal = true; }); },
+  close(){ commit(s => {
+    const cur = s.game.current, t = turnTeam(s);
+    s.game.log = [...(s.game.log||[]), {team:t.id, member:activeMember(s, t), c:cur.c, r:cur.r, winner:cur.winner ?? ""}];
+    s.game.ptr[t.id] = (s.game.ptr[t.id] || 0) + 1;      // nächste Person in diesem Team
+    s.game.current = null;
+    s.game.turn = (s.game.turn + 1) % s.settings.teams.length;
+  }); },
+  cancel(){ commit(s => { s.game.current = null; }); },
+  setTurn(i){ commit(s => { s.game.turn = i; }); },
+  skip(tid){ commit(s => { s.game.ptr[tid] = (s.game.ptr[tid] || 0) + 1; }); },
+  adj(tid, d){ commit(s => { s.game.adjust[tid] = (s.game.adjust[tid]||0) + d; }); }
+};
+
+// ---------- Rendering ----------
+function headerHTML(){
+  const c = store?.mode === "local"
+    ? `<span class="conn local">⚠ Lokaler Testmodus</span>`
+    : `<span class="conn ${connected?"on":"off"}"><i></i>${connected?"live":"verbinde…"}</span>`;
+  return `<header><div class="brand"><span class="tag">❄ Weihnachtsfeier</span><h1>${esc(state.settings.title)}</h1></div>${c}</header>`;
+}
+
+function boardHTML(gm){
+  const {categories, points, teams} = state.settings, cur = state.game.current;
+  let h = `<div class="board" style="grid-template-columns:repeat(${categories.length},1fr)">`;
+  categories.forEach(c => h += `<div class="cat">${esc(c.name)}</div>`);
+  points.forEach((p, r) => categories.forEach((c, ci) => {
+    const t = state.game.taken[ci+"_"+r];
+    let cls = "cell", style = "";
+    cls += " g" + (ci % 3);
+    if (t){ const tm = teams.find(x => x.id === t.team); if (tm){ cls += " taken"; style = `--tc:${tm.color}`; } else cls += " none"; }
+    if (cur && cur.c === ci && cur.r === r){ cls += " current"; style = ""; }
+    h += gm ? `<button class="${cls}" style="${style}" data-act="open" data-c="${ci}" data-r="${r}">${p}</button>`
+            : `<div class="${cls}" style="${style}">${p}</div>`;
+  }));
+  return h + "</div>";
+}
+
+function chipsHTML(){
+  const s = state;
+  if (!s.settings.teams.some(t => t.members.length)) return "";
+  return `<div class="lbl" style="margin-top:12px">Aktive Spieler</div><div class="chips">${s.settings.teams.map(t => {
+    const m = activeMember(s, t);
+    return `<span class="chip"><span class="dot" style="background:${t.color}"></span>${esc(t.name)}${m ? `: <b>${esc(m)}</b>` : ""}</span>`;
+  }).join("")}</div>`;
+}
+
+function currentHTML(gm){
+  const {teams, categories, points} = state.settings, cur = state.game.current;
+  const tt = turnTeam(state), tm = activeMember(state, tt);
+  if (!cur) return `<div class="card"><div class="lbl">Am Zug</div>
+    <div class="turn" style="color:${tt.color}">${esc(tt.name)}</div>${tm ? `<div class="person">${esc(tm)}</div>` : ""}
+    <div class="sub">${gm ? "Feld im Board antippen, um die Frage zu öffnen" : "wählt das nächste Feld"}</div>${chipsHTML()}</div>`;
+  const cat = categories[cur.c] || {name:"?", questions:[]}, q = cat.questions[cur.r] || {q:"", a:""}, pts = points[cur.r];
+  const decided = cur.winner != null, wt = teams.find(t => t.id === cur.winner);
+  let h = `<div class="card"><div class="meta">${esc(cat.name)} · ${pts} Punkte</div>
+    <div class="q">${esc(q.q) || "<i>(keine Frage eingetragen)</i>"}</div>
+    <div class="sub">gewählt von <b style="color:${tt.color}">${esc(tt.name)}</b>${tm ? ` · ${esc(tm)}` : ""}</div>`;
+  if (cur.reveal) h += `<div class="ans"><span class="lbl">Antwort</span><br>${esc(q.a) || "–"}</div>`;
+  else if (gm) h += `<div class="ans hidden"><span class="lbl">Antwort – nur du siehst das</span><br>${esc(q.a) || "–"}</div>`;
+  const wrong = (cur.wrong||[]).map(id => teams.find(t => t.id === id)).filter(Boolean);
+  if (wrong.length) h += `<div class="res">${wrong.map(t => `<span style="color:${t.color}">✗ ${esc(t.name)}</span>`).join("")}</div>`;
+  if (decided) h += `<div class="res big">${wt ? `<span style="color:${wt.color}">✓ ${esc(wt.name)} +${pts}</span>` : "Keiner wusste es"}</div>`;
+  h += chipsHTML();
+  if (gm){
+    h += `<div class="ctrl">`;
+    if (!decided){
+      h += teams.map(t => { const m = activeMember(state, t); return `<div class="trow2"><span class="dot" style="background:${t.color}"></span>
+        <span class="name">${esc(t.name)}${m ? ` <small>${esc(m)}</small>` : ""}</span>
+        <button class="ok" data-act="award" data-t="${t.id}">✓ richtig</button>
+        <button class="no" data-act="wrong" data-t="${t.id}" ${(cur.wrong||[]).includes(t.id)?"disabled":""}>✗ falsch</button></div>`; }).join("");
+      h += `<div class="btns">${cur.reveal ? "" : `<button class="sec" data-act="reveal">Antwort aufdecken</button>`}
+        <button class="sec" data-act="nobody">Keiner</button><button class="sec" data-act="cancel">Abbrechen</button></div>`;
+    } else h += `<div class="btns"><button class="primary" data-act="close">Weiter → nächste Runde</button></div>`;
+    h += `</div>`;
+  }
+  return h + "</div>";
+}
+
+function leaderHTML(gm){
+  const sc = scores(state), all = state.settings.teams;
+  const turnId = turnTeam(state)?.id, step = state.settings.points[0] || 10;
+  const list = all.map((t, i) => ({...t, i, score: sc[t.id]})).sort((a, b) => b.score - a.score);
+  return `<div class="lb">${list.map((t, n) => { const m = activeMember(state, t); return `<div class="row ${t.id === turnId ? "isturn" : ""}">
+    <span class="rank">${n+1}</span><span class="dot" style="background:${t.color}"></span>
+    <span class="name">${esc(t.name)}${t.members.length ? `<small>${t.members.map(x => x === m ? `<strong>${esc(x)}</strong>` : esc(x)).join(" · ")}</small>` : ""}</span>
+    <span class="sc">${t.score}</span>
+    ${gm ? `<div class="gmb"><button data-act="skip" data-t="${t.id}" title="nächste Person in diesem Team">↻ Person</button><button data-act="adj" data-t="${t.id}" data-d="${-step}">−${step}</button><button data-act="adj" data-t="${t.id}" data-d="${step}">+${step}</button><button data-act="turn" data-i="${t.i}">ist dran</button></div>` : ""}</div>`; }).join("")}</div>`;
+}
+
+function scheduleHTML(){
+  const s = state, {teams, categories, points} = s.settings, log = s.game.log || [], cur = s.game.current;
+  const total = categories.length * points.length, takenN = Object.keys(s.game.taken).length;
+  const decidedOpen = cur && cur.winner != null ? 1 : 0;
+  const n = Math.min(Math.max(total - takenN + decidedOpen, 0), 80);
+  let h = `<div class="sched" id="sched">`;
+  log.forEach((e, i) => {
+    const t = teams.find(x => x.id === e.team), w = teams.find(x => x.id === e.winner);
+    h += `<div class="srow past"><span class="rn">${i+1}</span><span class="dot" style="background:${t?.color || "#bbb"}"></span>
+      <span class="sn">${esc(t?.name || "?")}${e.member ? ` · <b>${esc(e.member)}</b>` : ""}</span>
+      <span class="sr">${esc(categories[e.c]?.name || "")} ${points[e.r] ?? ""}${w ? ` · ✓ ${esc(w.name)}` : " · –"}</span></div>`;
+  });
+  upcoming(s, n).forEach((u, k) => {
+    h += `<div class="srow ${k === 0 ? "now" : ""}" ${k === 0 ? 'id="schedNow"' : ""}><span class="rn">${log.length+k+1}</span>
+      <span class="dot" style="background:${u.t.color}"></span><span class="sn">${esc(u.t.name)}${u.member ? ` · <b>${esc(u.member)}</b>` : ""}</span>
+      <span class="sr">${k === 0 ? "jetzt" : k === 1 ? "als Nächstes" : ""}</span></div>`;
+  });
+  if (!n) h += `<div class="srow end">🏆 Alle Felder gespielt</div>`;
+  return h + `</div>`;
+}
+
+function setupHTML(){
+  const d = draft;
+  return `<section class="setup">
+  <h2>Allgemein</h2>
+  <label>Titel<input data-f="title" value="${esc(d.title)}"></label>
+  <label>Punktestufen (Komma-getrennt)<input data-f="points" value="${d.points.join(", ")}"></label>
+  <label class="chk"><input type="checkbox" data-f="allowMinus" ${d.allowMinus ? "checked" : ""}> Minuspunkte bei falscher Antwort</label>
+  <h2>Teams &amp; Mitglieder</h2>
+  <p class="sub" style="text-align:left">Mitglieder in Spielreihenfolge, getrennt durch Komma oder Zeilenumbruch. Pro Runde rotiert im Team am Zug die Person weiter.</p>
+  ${d.teams.map((t, i) => `<div class="tcard"><div class="trow"><input type="color" data-team="${i}" data-k="color" value="${t.color}">
+    <input data-team="${i}" data-k="name" value="${esc(t.name)}" placeholder="Teamname">
+    <button class="sec" data-act="delTeam" data-i="${i}">✕</button></div>
+    <textarea data-team="${i}" data-k="members" placeholder="Anna, Ben, Carla, Dirk">${esc(t.members.join(", "))}</textarea></div>`).join("")}
+  <button class="sec" data-act="addTeam">+ Team</button>
+  <h2>Kategorien &amp; Fragen</h2>
+  ${d.categories.map((c, ci) => `<details class="catedit" data-ci="${ci}" ${openCats.has(ci) ? "open" : ""}>
+    <summary>${esc(c.name) || "Kategorie"} <span>– ${c.questions.filter(q => q.q).length}/${d.points.length} Fragen</span></summary>
+    <label>Name<input data-cat="${ci}" value="${esc(c.name)}"></label>
+    ${d.points.map((p, r) => `<div class="qrow"><b>${p}</b>
+      <textarea data-cat="${ci}" data-r="${r}" data-k="q" placeholder="Frage">${esc(c.questions[r]?.q)}</textarea>
+      <input data-cat="${ci}" data-r="${r}" data-k="a" value="${esc(c.questions[r]?.a)}" placeholder="Antwort"></div>`).join("")}
+    <button class="danger" data-act="delCat" data-i="${ci}">Kategorie löschen</button></details>`).join("")}
+  <button class="sec" data-act="addCat">+ Kategorie</button>
+  <div class="savebar"><button class="primary" data-act="saveSetup">Speichern</button><button class="sec" data-act="discard">Verwerfen</button></div>
+  <h2>Daten</h2>
+  <div class="btns" style="justify-content:flex-start">
+    <button class="sec" data-act="export">Export (JSON)</button>
+    <label class="btn sec" style="margin:0;font-size:inherit">Import (JSON)<input type="file" accept=".json,application/json" data-act="import" hidden></label>
+    <button class="danger" data-act="resetGame">Spielstand zurücksetzen</button>
+  </div></section>`;
+}
+
+function afterRender(){
+  const sc = document.getElementById("sched"), nw = document.getElementById("schedNow");
+  if (sc && nw) sc.scrollTop = Math.max(0, nw.offsetTop - 40);
+}
+
+function render(){
+  const gmRoute = location.hash === "#gm";
+  if (gmRoute && !isGM){
+    $app.innerHTML = headerHTML() + `<form class="card login"><div class="lbl">Game Master</div>
+      <input type="password" name="pw" placeholder="Passwort" autofocus><button class="primary">Einloggen</button></form>`;
+    return;
+  }
+  const play = gm => currentHTML(gm) + boardHTML(gm) + `<h3>Punktestand</h3>` + leaderHTML(gm) + `<h3>Reihenfolge</h3>` + scheduleHTML();
+  if (!gmRoute){ $app.innerHTML = headerHTML() + play(false); afterRender(); return; }
+  const nav = `<nav class="gmnav">
+    <button data-act="tab" data-t="spiel" class="${gmTab === "spiel" ? "on" : ""}">Spiel</button>
+    <button data-act="tab" data-t="setup" class="${gmTab === "setup" ? "on" : ""}">Setup</button>
+    <button data-act="undo" ${history.length ? "" : "disabled"}>↶ Rückgängig</button>
+    <a class="btn sec" href="${location.pathname}" target="_blank">Zuschauer-Ansicht ↗</a></nav>`;
+  if (gmTab === "setup"){ if (!draft) draft = clone(state.settings); $app.innerHTML = headerHTML() + nav + setupHTML(); }
+  else { $app.innerHTML = headerHTML() + nav + play(true); afterRender(); }
+}
+
+// ---------- Events ----------
+$app.addEventListener("submit", e => {
+  e.preventDefault();
+  if (e.target.pw.value === GM_PASSWORD){ isGM = true; sessionStorage.setItem("gm", "1"); render(); }
+  else alert("Falsches Passwort");
+});
+
+$app.addEventListener("click", e => {
+  const b = e.target.closest("[data-act]");
+  if (!b || b.tagName === "INPUT") return;
+  const d = b.dataset;
+  switch (d.act){
+    case "open": A.open(+d.c, +d.r); break;
+    case "reveal": A.reveal(); break;
+    case "award": A.award(d.t); break;
+    case "wrong": A.wrong(d.t); break;
+    case "nobody": A.nobody(); break;
+    case "close": A.close(); break;
+    case "cancel": A.cancel(); break;
+    case "turn": A.setTurn(+d.i); break;
+    case "skip": A.skip(d.t); break;
+    case "adj": A.adj(d.t, +d.d); break;
+    case "undo": undo(); break;
+    case "tab": gmTab = d.t; draft = gmTab === "setup" ? clone(state.settings) : null; render(); break;
+    case "addTeam": draft.teams.push({id:"t"+Date.now().toString(36), name:"Team "+(draft.teams.length+1), color:TEAM_COLORS[draft.teams.length % TEAM_COLORS.length], members:[]}); render(); break;
+    case "delTeam": if (draft.teams.length > 1){ draft.teams.splice(+d.i, 1); render(); } break;
+    case "addCat": draft.categories.push({name:"Neue Kategorie", questions: draft.points.map(() => ({q:"", a:""}))}); openCats.add(draft.categories.length-1); render(); break;
+    case "delCat": if (confirm("Kategorie löschen?")){ draft.categories.splice(+d.i, 1); openCats.clear(); render(); } break;
+    case "discard": draft = clone(state.settings); render(); break;
+    case "saveSetup": {
+      const s2 = clone(draft);
+      commit(s => { s.settings = s2; s.game.turn = s.game.turn % s2.teams.length; });
+      draft = clone(s2); toast("Gespeichert ✓"); break;
+    }
+    case "export": {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(new Blob([JSON.stringify(state, null, 2)], {type:"application/json"}));
+      a.download = "grosser-preis-" + new Date().toISOString().slice(0,10) + ".json"; a.click(); break;
+    }
+    case "resetGame": if (confirm("Spielstand wirklich zurücksetzen? Fragen, Teams und Mitglieder bleiben erhalten.")) commit(s => { s.game = {taken:{}, adjust:{}, ptr:{}, log:[], current:null, turn:0}; }); break;
+  }
+});
+
+$app.addEventListener("input", e => {
+  const el = e.target; if (!draft) return;
+  if (el.dataset.f === "title") draft.title = el.value;
+  else if (el.dataset.f === "allowMinus") draft.allowMinus = el.checked;
+  else if (el.dataset.team != null){
+    const t = draft.teams[+el.dataset.team];
+    t[el.dataset.k] = el.dataset.k === "members" ? parseMembers(el.value) : el.value;
+  }
+  else if (el.dataset.cat != null){
+    const c = draft.categories[+el.dataset.cat];
+    if (el.dataset.r != null) c.questions[+el.dataset.r][el.dataset.k] = el.value; else c.name = el.value;
+  }
+});
+
+$app.addEventListener("change", e => {
+  const el = e.target;
+  if (el.dataset.f === "points" && draft){
+    const pts = el.value.split(/[,;\s]+/).map(Number).filter(n => n > 0);
+    if (pts.length){ draft.points = pts; draft.categories.forEach(c => c.questions = pad(c.questions, pts.length)); }
+    render();
+  }
+  if (el.dataset.act === "import" && el.files[0]){
+    el.files[0].text().then(txt => {
+      try { const imported = normalize(JSON.parse(txt)); commit(s => { s.settings = imported.settings; s.game = imported.game; }); draft = clone(state.settings); render(); toast("Importiert ✓"); }
+      catch(err){ alert("Import fehlgeschlagen: " + err.message); }
+    });
+  }
+});
+
+$app.addEventListener("toggle", e => {
+  const ci = e.target.dataset?.ci; if (ci == null) return;
+  e.target.open ? openCats.add(+ci) : openCats.delete(+ci);
+}, true);
+
+
+// ---------- Schneefall ----------
+(function snow(){
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c = document.createElement("canvas"); c.id = "snow"; document.body.prepend(c);
+  const x = c.getContext("2d"); let w, h; const f = [];
+  const rs = () => { w = c.width = innerWidth; h = c.height = innerHeight; }; rs(); addEventListener("resize", rs);
+  for (let i = 0; i < 70; i++) f.push({x:Math.random()*w, y:Math.random()*h, r:Math.random()*2.2+.6, s:Math.random()*.6+.3, d:Math.random()*6.3});
+  (function loop(){
+    x.clearRect(0, 0, w, h); x.fillStyle = "rgba(255,255,255,.75)"; x.beginPath();
+    for (const p of f){ p.y += p.s; p.d += .01; p.x += Math.sin(p.d)*.4; if (p.y > h){ p.y = -5; p.x = Math.random()*w; } x.moveTo(p.x, p.y); x.arc(p.x, p.y, p.r, 0, 7); }
+    x.fill(); requestAnimationFrame(loop);
+  })();
+})();
+
+window.addEventListener("hashchange", render);
+render();
+initStore().catch(e => { $app.insertAdjacentHTML("afterbegin", `<div class="card">Verbindung fehlgeschlagen: ${esc(e.message)}</div>`); });
+</script>
+</body>
+</html>
